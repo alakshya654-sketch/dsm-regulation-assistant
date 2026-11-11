@@ -11,6 +11,10 @@ The key is never shown.
 
 Look: dark "grid control room" theme matching the design canvas (IBM Plex, amber accent).
 The colours of Streamlit's own widgets come from .streamlit/config.toml.
+
+CR-8 (5.5): themed message boxes, tab-style page switcher, slim demo bar, visitor sidebar in demo
+mode (developer details in "About this build"), plain error messages, footer, phone layout.
+How answers are produced is unchanged.
 """
 from __future__ import annotations
 
@@ -26,7 +30,10 @@ import pandas as pd
 import streamlit as st
 import yaml
 
-DASHBOARD_VERSION = "5.4"
+DASHBOARD_VERSION = "5.5"
+
+# Link shown in the footer. Leave empty to show the footer without a link.
+REPO_URL = ""
 
 ROOT = Path(__file__).resolve().parent.parent
 if str(ROOT / "src") not in sys.path:
@@ -132,6 +139,54 @@ div[data-testid="stButton"] button{text-align:left;justify-content:flex-start;bo
 .calc .facts{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
 .calc .facts span{font-family:'IBM Plex Mono', monospace;font-size:12px;padding:4px 9px;border-radius:7px;
                   background:var(--panel2);color:var(--soft)}
+/* CR-8 P-4: Streamlit's message boxes in the theme */
+[data-testid="stAlertContainer"]{background:var(--panel) !important;border:1px solid var(--line) !important;
+  border-left:3px solid var(--accent) !important;border-radius:10px !important;color:var(--soft) !important}
+[data-testid="stAlertContainer"] p, [data-testid="stAlertContainer"] div{color:var(--soft) !important}
+[data-testid="stAlertContainer"] svg{display:none}
+[data-testid="stAlertContainer"]:has([data-testid="stAlertContentWarning"]){border-left-color:#FFB37A !important}
+[data-testid="stAlertContainer"]:has([data-testid="stAlertContentError"]){border-left-color:#FF8A80 !important}
+[data-testid="stAlertContainer"]:has([data-testid="stAlertContentSuccess"]){border-left-color:var(--good) !important}
+/* CR-8 P-1: the page switcher as tabs */
+.st-key-page [role="radiogroup"]{gap:4px !important;border-bottom:1px solid var(--line2);width:100%;flex-wrap:nowrap}
+.st-key-page [role="radiogroup"] label{margin:0 !important;padding:10px 16px 9px !important;
+  border-bottom:2px solid transparent;cursor:pointer}
+.st-key-page [role="radiogroup"] label > div:first-child{display:none !important}
+.st-key-page [data-testid="stRadioOption"] > div > div:first-child:not([data-testid="stMarkdownContainer"]){display:none !important}
+.st-key-page [role="radiogroup"] label p{font-size:14px;font-weight:500;color:var(--muted)}
+.st-key-page [role="radiogroup"] label:hover p{color:var(--text)}
+.st-key-page [role="radiogroup"] label:has(input:checked){border-bottom-color:var(--accent)}
+.st-key-page [role="radiogroup"] label:has(input:checked) p{color:var(--text)}
+/* CR-8 P-2: slim demo bar */
+.demo-bar{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;
+  padding:9px 14px;margin:0 0 12px;background:var(--panel);border:1px solid var(--line2);border-radius:10px;
+  font-size:13px;color:var(--muted)}
+.demo-bar b{color:var(--soft);font-weight:500}
+.demo-bar .left{font-family:'IBM Plex Mono', monospace;font-size:12px;padding:3px 10px;border-radius:999px;
+  border:1px solid #5A4416;color:var(--accent);white-space:nowrap}
+.demo-bar .left.out{border-color:#5C2A2A;color:#FF8A80}
+/* CR-8 P-3: visitor sidebar */
+.side-h{font-size:14px;font-weight:600;color:var(--text);margin:2px 0 6px}
+.side-p{font-size:13px;line-height:1.55;color:var(--soft);margin:0 0 14px}
+.side-p ol, .side-p ul{margin:0;padding-left:18px} .side-p li{margin-bottom:3px}
+.hint{font-size:12px;color:var(--muted);margin:2px 0 10px}
+/* CR-8 P-7: footer */
+.dsm-foot{margin-top:36px;padding-top:14px;border-top:1px solid var(--line2);display:flex;flex-wrap:wrap;
+  justify-content:space-between;gap:8px;font-size:12px;color:var(--muted)}
+.dsm-foot a{color:var(--soft) !important;text-decoration:none;border-bottom:1px solid var(--line)}
+.dsm-foot a:hover{color:var(--accent) !important}
+/* CR-8 P-8: phone screens */
+@media (max-width: 640px){
+  .block-container{padding-top:1rem;padding-left:1rem;padding-right:1rem}
+  .hero{padding:18px 18px;border-radius:12px}
+  .hero h2{font-size:24px}
+  .hero p{font-size:14.5px}
+  .dsm-title{font-size:18px}
+  .pills{display:none}
+  .ubbl{max-width:92%}
+  .st-key-page [role="radiogroup"] label{padding:8px 10px 7px !important}
+  .calc .big{font-size:28px}
+}
 </style>
 """
 
@@ -258,6 +313,51 @@ def provider_line(client) -> str:
     if getattr(client, "fallback", None):
         line += f" (backup: {client.fallback.provider})"
     return line
+
+
+# ---------------------------------------------------------------------------
+# CR-8: plain error messages, demo bar, footer
+# ---------------------------------------------------------------------------
+QUOTA_WORDS = ("quota", "429", "rate limit", "rate_limit", "ratelimit", "resource_exhausted",
+               "resource exhausted", "too many requests", "exhausted")
+NETWORK_WORDS = ("timeout", "timed out", "connection", "network", "unreachable", "503", "502", "504",
+                 "unavailable", "temporarily", "dns", "ssl")
+
+
+def friendly_error(e: Exception) -> str:
+    """A plain message for a visitor. The raw error goes to the server log only (CR-8 P-5)."""
+    print(f"[dashboard] {type(e).__name__}: {e}", file=sys.stderr)
+    text = f"{type(e).__name__} {e}".lower()
+    if any(w in text for w in QUOTA_WORDS):
+        return "The free model limit is reached for now. Please try again in a few minutes."
+    if any(w in text for w in NETWORK_WORDS):
+        return "Couldn't reach the model. Please try again."
+    return "Something went wrong. Please try again."
+
+
+def error_text(e: Exception, demo: bool) -> str:
+    """Visitors get the plain message; on the laptop (not demo) the detail is added for debugging."""
+    msg = friendly_error(e)
+    return msg if demo else f"{msg}\n\nDetail (shown only outside demo mode): {e}"
+
+
+def demo_bar(assistant) -> None:
+    demo = assistant["demo"]
+    left = max(demo["per_visitor"] - st.session_state.get("demo_used", 0), 0)
+    st.markdown(
+        '<div class="demo-bar"><span><b>Public demo</b> · answers come only from the indexed CERC documents '
+        '· not legal advice</span>'
+        f'<span class="left{" out" if left == 0 else ""}">{left} of {demo["per_visitor"]} questions left</span></div>',
+        unsafe_allow_html=True)
+
+
+def footer() -> None:
+    link = (f' · <a href="{esc(REPO_URL)}" target="_blank" rel="noopener">Source code on GitHub</a>'
+            if REPO_URL else "")
+    st.markdown(
+        '<div class="dsm-foot"><span>Reference aid, not legal advice. Always check the cited regulation.</span>'
+        f'<span>DSM Regulation Assistant{link}</span></div>',
+        unsafe_allow_html=True)
 
 
 # ---------------------------------------------------------------------------
@@ -640,6 +740,9 @@ def topic_page(assistant) -> None:
             for i, t in enumerate(TOPIC_EXAMPLES):
                 if cols[i % 2].button(t, key=f"topic-example-{i}", use_container_width=True):
                     st.session_state.pending_topic = t
+            if assistant["demo"]["enabled"]:
+                st.markdown(f'<div class="hint">Each topic brief uses {assistant["demo"]["brief_cost"]} of your '
+                            'questions.</div>', unsafe_allow_html=True)
         with st.form("topic-form", clear_on_submit=True):
             t = st.text_input("Topic", placeholder="e.g. infirm power, TRAS, connectivity bank guarantee", key="topic-text")
             submitted = st.form_submit_button("Brief me")
@@ -654,8 +757,7 @@ def topic_page(assistant) -> None:
                                                  today=date.today()))
                 st.rerun()                                      # redraw without the intro
             except llm.LLMError as e:
-                st.error(f"The model could not write the briefing: {e}. If this says quota, the free limit was "
-                         "reached; wait a minute, or try again tomorrow.")
+                st.error(error_text(e, assistant["demo"]["enabled"]))
         if briefs:
             show_briefing(briefs[0])
             if len(briefs) > 1:
@@ -683,34 +785,69 @@ def header(assistant) -> None:
         unsafe_allow_html=True)
 
 
+def status_rows(assistant) -> None:
+    """Index, model and key status (no key value is ever shown, only set / not set)."""
+    gem = bool(os.environ.get("GEMINI_API_KEY"))
+    groq = bool(os.environ.get("GROQ_API_KEY"))
+    models = assistant["settings"]["gemini_models"]
+    st.markdown(
+        '<div class="side-rows">'
+        f'<div><span>Index</span><span><b>{assistant["chunks"]}</b> passages · {assistant["docs"]} docs</span></div>'
+        f'<div><span>Model</span><span class="mono" style="font-size:12px">{esc(provider_line(assistant["client"]))}</span></div>'
+        f'<div><span>First choice</span><span class="mono" style="font-size:12px">{esc(models[0]) if models else "–"}</span></div>'
+        f'<div><span>Gemini key</span><span><span class="dot" style="background:{"#5FD39A" if gem else "#FF8A80"}"></span>'
+        f'{"set" if gem else "not set"}</span></div>'
+        f'<div><span>Groq key</span><span><span class="dot" style="background:{"#5FD39A" if groq else "#4A5A6E"}"></span>'
+        f'{"set" if groq else "not set"}</span></div>'
+        '</div>',
+        unsafe_allow_html=True)
+    st.caption(f"Dashboard {DASHBOARD_VERSION} · answer {answer.VERSION} · topic {topic.VERSION} · llm {llm.VERSION}")
+
+
+def date_controls():
+    pick_date = st.checkbox("Answer for a different date",
+                            help="Questions without a date are answered for the rules in force on this date. "
+                                 "A date written in the question still wins.")
+    return st.date_input("Rules in force as of", value=date.today(), format="DD.MM.YYYY") if pick_date else None
+
+
+def clear_chat_button() -> None:
+    if st.button("Clear chat", use_container_width=False):
+        st.session_state.history = []
+        st.session_state.pop("selected", None)
+
+
 def sidebar(assistant):
     with st.sidebar:
-        st.markdown('<span class="label">Settings</span>', unsafe_allow_html=True)
-        pick_date = st.checkbox("Answer for a different date",
-                                help="Questions without a date are answered for the rules in force on this date. "
-                                     "A date written in the question still wins.")
-        as_of = st.date_input("Rules in force as of", value=date.today(), format="DD.MM.YYYY") if pick_date else None
-        top_k = st.slider("Passages given to the model", 3, 8, assistant["top_k"])
-        if st.button("Clear chat", use_container_width=False):
-            st.session_state.history = []
-            st.session_state.pop("selected", None)
+        if assistant["demo"]["enabled"]:                       # CR-8 P-3: what a visitor needs
+            st.markdown(
+                '<div class="side-h">How it works</div><div class="side-p"><ol>'
+                '<li>Your question is matched to the regulation version in force on its date.</li>'
+                '<li>The most relevant clauses are found by meaning and by keywords.</li>'
+                '<li>The model answers only from those clauses, and every fact is cited.</li></ol></div>'
+                '<div class="side-h">Covers</div><div class="side-p"><ul>'
+                '<li>CERC DSM Regulations, past and current, with amendments</li>'
+                '<li>Related CERC rules: Grid Code, GNA, Ancillary Services, Power Market</li></ul></div>'
+                '<div class="side-h">Doesn\'t cover</div><div class="side-p"><ul>'
+                '<li>State (SERC) regulations</li><li>Orders and documents not indexed here</li>'
+                '<li>Legal advice</li></ul></div>',
+                unsafe_allow_html=True)
+            st.markdown('<span class="label">Settings</span>', unsafe_allow_html=True)
+            as_of = date_controls()
+            clear_chat_button()
+            st.markdown('<div style="height:14px"></div>', unsafe_allow_html=True)
+            with st.expander("About this build"):
+                top_k = st.slider("Passages given to the model", 3, 8, assistant["top_k"])
+                status_rows(assistant)
+            return as_of, top_k
 
-        gem = bool(os.environ.get("GEMINI_API_KEY"))
-        groq = bool(os.environ.get("GROQ_API_KEY"))
-        models = assistant["settings"]["gemini_models"]
-        st.markdown(
-            '<div style="height:18px"></div><span class="label">Status</span><div style="height:10px"></div>'
-            '<div class="side-rows">'
-            f'<div><span>Index</span><span><b>{assistant["chunks"]}</b> passages · {assistant["docs"]} docs</span></div>'
-            f'<div><span>Model</span><span class="mono" style="font-size:12px">{esc(provider_line(assistant["client"]))}</span></div>'
-            f'<div><span>First choice</span><span class="mono" style="font-size:12px">{esc(models[0]) if models else "–"}</span></div>'
-            f'<div><span>Gemini key:</span><span><span class="dot" style="background:{"#5FD39A" if gem else "#FF8A80"}"></span>'
-            f'{"set" if gem else "not set"}</span></div>'
-            f'<div><span>Groq key</span><span><span class="dot" style="background:{"#5FD39A" if groq else "#4A5A6E"}"></span>'
-            f'{"set" if groq else "not set"}</span></div>'
-            '</div>',
-            unsafe_allow_html=True)
-        st.caption(f"Dashboard {DASHBOARD_VERSION} · answer {answer.VERSION} · topic {topic.VERSION} · llm {llm.VERSION}")
+        st.markdown('<span class="label">Settings</span>', unsafe_allow_html=True)
+        as_of = date_controls()
+        top_k = st.slider("Passages given to the model", 3, 8, assistant["top_k"])
+        clear_chat_button()
+        st.markdown('<div style="height:18px"></div><span class="label">Status</span><div style="height:10px"></div>',
+                    unsafe_allow_html=True)
+        status_rows(assistant)
     return as_of, top_k
 
 
@@ -722,15 +859,15 @@ def main() -> None:
         assistant = load_assistant()
     except Exception as e:                                     # missing index, chunks or package
         st.title("DSM Regulation Assistant")
-        st.error(f"The assistant could not start: {e}")
+        demo_env = os.environ.get("DEMO_MODE", "").strip().lower() in ("1", "true", "yes", "on")
+        print(f"[dashboard] start-up failed: {type(e).__name__}: {e}", file=sys.stderr)
+        st.error("The assistant couldn't start. Please try again in a few minutes." if demo_env
+                 else f"The assistant could not start: {e}")
         st.stop()
 
     header(assistant)
     if assistant["demo"]["enabled"]:
-        left = max(assistant["demo"]["per_visitor"] - st.session_state.get("demo_used", 0), 0)
-        st.info(f"**Public demo.** Answers come only from the CERC documents indexed here and can be incomplete; "
-                f"check the cited clause before relying on one. Not legal advice. You have **{left}** questions left "
-                f"(a topic brief uses {assistant['demo']['brief_cost']}); the calculator page is unlimited.")
+        demo_bar(assistant)
     as_of, top_k = sidebar(assistant)
     history = st.session_state.setdefault("history", [])
 
@@ -738,9 +875,11 @@ def main() -> None:
                     label_visibility="collapsed", key="page")
     if page == "DSM calculator":
         calculator_page()
+        footer()
         return
     if page == "Topic brief":
         topic_page(assistant)
+        footer()
         return
 
     chat, panel = st.columns([3, 2], gap="large")
@@ -756,6 +895,8 @@ def main() -> None:
             for i, (kind, q) in enumerate(EXAMPLES):
                 if cols[i % 2].button(f"{kind}  ·  {q}", key=f"example-{i}", use_container_width=True):
                     st.session_state.pending = q
+            if assistant["demo"]["enabled"]:
+                st.markdown('<div class="hint">Each example uses 1 of your questions.</div>', unsafe_allow_html=True)
 
         for item in history:
             st.markdown(f'<div class="ubbl">{esc(item["question"])}</div>', unsafe_allow_html=True)
@@ -779,9 +920,7 @@ def main() -> None:
                 history.append({"question": question, "answer": a})
                 st.session_state.selected = len(history) - 1
             except llm.LLMError as e:
-                history.append({"question": question, "error": (
-                    f"The model could not answer: {e}. If this says quota, the free limit was reached; "
-                    "wait a minute, or try again tomorrow.")})
+                history.append({"question": question, "error": error_text(e, assistant["demo"]["enabled"])})
         st.rerun()
 
     with panel:
@@ -798,6 +937,8 @@ def main() -> None:
                 chosen = st.selectbox("Show details for", answered, index=answered.index(chosen),
                                       format_func=lambda i: f"Q{i + 1}: {history[i]['question'][:70]}")
             show_behind_the_scenes(history[chosen]["answer"])
+
+    footer()
 
 
 main()
