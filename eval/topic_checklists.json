@@ -1,0 +1,37 @@
+{
+ "infirm power": [
+  {"item": "DSM 2024 Reg 8(8), original text", "labels": [{"doc_id": "dsm-2024", "regulation_no": "8", "clause_no": "(8)"}]},
+  {"item": "First Amendment (23.12.2024)", "labels": [{"doc_id": "dsm-2024-amend-1", "regulation_no": "8"}]},
+  {"item": "Second Amendment (01.07.2025): thermal, ₹2.86 cap", "labels": [{"doc_id": "dsm-2024-amend-2", "regulation_no": "8"}]},
+  {"item": "Third Amendment (31.08.2026): ESS, ₹2.00 cap", "labels": [{"doc_id": "dsm-2024-amend-3", "regulation_no": "8"}]},
+  {"item": "Grid Code infirm-power rules (Reg 19)", "labels": [{"doc_id": "iegc-2023", "regulation_no": "19"}, {"doc_id": "iegc-2023-amend-1", "regulation_no": "19"}]},
+  {"item": "Why: a Statement of Reasons", "labels": [{"doc_id": "sor-dsm-2024-amend-1"}, {"doc_id": "sor-dsm-2024-amend-2"}, {"doc_id": "sor-dsm-2024-amend-3"}, {"doc_id": "sor-dsm-2024"}]},
+  {"item": "Proposal: draft Third Amendment", "labels": [{"doc_id": "draft-dsm-2024-amend-3"}, {"doc_id": "em-draft-dsm-2024-amend-3"}]},
+  {"item": "History: DSM 2022 Reg 8", "labels": [{"doc_id": "dsm-2022", "regulation_no": "8"}]}
+ ],
+ "TRAS": [
+  {"item": "AS 2022 TRAS rules (Regs 14-19)", "labels": [{"doc_id": "as-2022", "regulation_no": "14"}, {"doc_id": "as-2022", "regulation_no": "15"}, {"doc_id": "as-2022", "regulation_no": "16"}, {"doc_id": "as-2022", "regulation_no": "17"}, {"doc_id": "as-2022", "regulation_no": "18"}, {"doc_id": "as-2022", "regulation_no": "19"}]},
+  {"item": "Final TRAS start 01.06.2023", "labels": [{"doc_id": "as-2022-eff-tras-010623"}]},
+  {"item": "The postponed starts (01.04 / 01.05.2023)", "labels": [{"doc_id": "as-2022-eff-tras-010423"}, {"doc_id": "as-2022-eff-tras-010523"}]},
+  {"item": "DSM Pool Account: TRAS-Up / TRAS-Down", "labels": [{"doc_id": "dsm-2024", "regulation_no": "9"}]},
+  {"item": "Normal Rate includes TRAS-Up (DSM Reg 7)", "labels": [{"doc_id": "dsm-2024", "regulation_no": "7"}]},
+  {"item": "Grid Code reserves (IEGC Reg 30)", "labels": [{"doc_id": "iegc-2023", "regulation_no": "30"}]},
+  {"item": "Why: AS 2022 Statement of Reasons", "labels": [{"doc_id": "sor-as-2022"}]}
+ ],
+ "payment of deviation charges": [
+  {"item": "DSM 2024 Reg 10 (10 days, 0.04%, LC)", "labels": [{"doc_id": "dsm-2024", "regulation_no": "10"}]},
+  {"item": "Third Amendment Reg 10 (Detailed Procedure alternative)", "labels": [{"doc_id": "dsm-2024-amend-3", "regulation_no": "10"}]},
+  {"item": "Proposal: draft Third Amendment Reg 10", "labels": [{"doc_id": "draft-dsm-2024-amend-3", "regulation_no": "10"}]},
+  {"item": "History: DSM 2022 Reg 10 (7 days)", "labels": [{"doc_id": "dsm-2022", "regulation_no": "10"}]},
+  {"item": "Weekly statement by the RPC (Reg 9)", "labels": [{"doc_id": "dsm-2024", "regulation_no": "9"}]},
+  {"item": "Why: a Statement of Reasons on Reg 10", "labels": [{"doc_id": "sor-dsm-2024-amend-3", "regulation_no": "10"}, {"doc_id": "sor-dsm-2024", "regulation_no": "10"}, {"doc_id": "sor-dsm-2022", "regulation_no": "10"}]}
+ ],
+ "volume limits for wind and solar sellers": [
+  {"item": "DSM 2024 Reg 8(4): VLwS, both periods", "labels": [{"doc_id": "dsm-2024", "regulation_no": "8", "clause_no": "(4)"}]},
+  {"item": "DWS formula (Reg 6)", "labels": [{"doc_id": "dsm-2024", "regulation_no": "6"}]},
+  {"item": "Value of X (secondary summary)", "labels": [{"doc_id": "secondary-jsa-x-order-2026"}]},
+  {"item": "Third Amendment Reg 8(4A): at par with general sellers", "labels": [{"doc_id": "dsm-2024-amend-3", "regulation_no": "8"}]},
+  {"item": "Why: DSM 2024 Statement of Reasons", "labels": [{"doc_id": "sor-dsm-2024"}]},
+  {"item": "History: DSM 2022 Reg 8", "labels": [{"doc_id": "dsm-2022", "regulation_no": "8"}]}
+ ]
+}

@@ -1,0 +1,881 @@
+# =============================================================================
+# Document registry — single source of truth for the corpus (Design §4.1)
+# Project : dsm-regulation-assistant
+# Version : 1.1   Date: 2026-11-04   (1.1: CR-2 Batch A — Grid Code, Ancillary Services, GNA, Power Market)
+# Source  : cercind.gov.in — "Current Regulations" and "Draft Regulation" pages
+#
+# Field guide
+#   doc_id          stable id used in citations (never rename once indexed)
+#   doc_type        principal | amendment | draft | sor | em | order | procedure | effective_notice
+#   status          final | superseded | draft
+#   regime          dsm-2022 | dsm-2024 | iegc-2023 | as-2022 | gna-2022 | pmr-2021
+#                   (which family of regulations it belongs to)
+#   notified_date   date on the notification / order (YYYY-MM-DD, null if unknown)
+#   effective_from  date the text starts to apply (null for drafts and explanatory docs)
+#   effective_to    date it stops applying (null = still in force)
+#   amends          doc_id of the regulation this document changes
+#   tier            core (must index) | history | drafts | reference
+#   include         true/false — whether notebook 04 indexes it
+#   url             official PDF link (the notebook tries case variants if it 404s)
+#   notes           anything a reviewer should know
+#
+# Text source rule: we index the "Notification" PDF, not the "Gazette" PDF.
+# Same legal text, but Gazette copies add Hindi pages and scan artefacts.
+# =============================================================================
+
+documents:
+
+  # --------------------------------------------------------------------------
+  # TIER: core — the regulations in force today (DSM 2024 regime)
+  # --------------------------------------------------------------------------
+  - doc_id: dsm-2024
+    title: CERC (Deviation Settlement Mechanism and Related Matters) Regulations, 2024
+    doc_type: principal
+    status: final
+    regime: dsm-2024
+    notified_date: 2024-08-05
+    effective_from: 2024-09-16
+    effective_to: null
+    amends: null
+    tier: core
+    include: true
+    url: https://cercind.gov.in/regulations/192-Noti.pdf
+    notes: >
+      Gazette No. 642 dated 21.08.2024. Effective 16.09.2024 except Regulation 8(8),
+      which got separate effective-date notices (see dsm-2024-eff-* below).
+
+  - doc_id: dsm-2024-errata
+    title: Errata to DSM Regulations, 2024 (Gazette No. 946)
+    doc_type: amendment
+    status: final
+    regime: dsm-2024
+    notified_date: null
+    effective_from: 2024-09-16
+    effective_to: null
+    amends: dsm-2024
+    tier: core
+    include: true
+    url: https://cercind.gov.in/regulations/192-ERRATA.pdf
+    notes: Corrections to the principal text; date to be read from the PDF in Phase 3.
+
+  - doc_id: dsm-2024-amend-1
+    title: DSM (First Amendment) Regulations, 2024
+    doc_type: amendment
+    status: final
+    regime: dsm-2024
+    notified_date: 2024-12-24
+    effective_from: 2024-12-23
+    effective_to: null
+    amends: dsm-2024
+    tier: core
+    include: true
+    url: https://cercind.gov.in/regulations/194.pdf
+    notes: Gazette No. 1030 dated 24.12.2024. Effective date 23.12.2024 per the Second Amendment's Statement of Reasons.
+
+  - doc_id: dsm-2024-amend-2
+    title: DSM (Second Amendment) Regulations, 2025
+    doc_type: amendment
+    status: final
+    regime: dsm-2024
+    notified_date: 2025-06-25
+    effective_from: 2025-07-01
+    effective_to: null
+    amends: dsm-2024
+    tier: core
+    include: true
+    url: https://cercind.gov.in/regulations/199.pdf
+    notes: Gazette No. 473. Infirm power and related changes to Regulation 8.
+
+  - doc_id: dsm-2024-amend-3
+    title: DSM (Third Amendment) Regulations, 2026
+    doc_type: amendment
+    status: final
+    regime: dsm-2024
+    notified_date: 2026-08-25
+    effective_from: 2026-08-31
+    effective_to: null
+    amends: dsm-2024
+    tier: core
+    include: true
+    url: https://cercind.gov.in/regulations/208-notification.pdf
+    notes: >
+      Gazette No. 542 dated 07.09.2026. Inserts Reg 8(4A) (WS sellers treated at par
+      with general sellers for some new projects), a note after 8(5) (pumped hydro ESS),
+      Reg 8(8)(2A) (standalone ESS infirm power), and changes Reg 10 payment timelines.
+
+  - doc_id: order-9-sm-2025
+    title: Order determining value of "X" for deviation (%) of WS sellers from 01.04.2026
+    doc_type: order
+    status: final
+    regime: dsm-2024
+    notified_date: 2026-03-31
+    effective_from: 2026-04-01
+    effective_to: null
+    amends: dsm-2024
+    tier: core
+    include: false
+    url: https://cercind.gov.in/Regulations/9-SM-2025.pdf
+    notes: >
+      Official order (suo-motu Petition 9/SM/2025, dated 31.03.2026). NOT AVAILABLE:
+      official URL 404 and no other copy obtainable on 2026-10-13. include=false until a
+      copy is saved as data/raw/order-9-sm-2025.pdf. Stand-in: secondary-jsa-x-order-2026.
+
+  - doc_id: secondary-jsa-x-order-2026
+    title: JSA Prism (Electricity & Power, April 2026) — summary of CERC order dated 31.03.2026 on factor X
+    doc_type: secondary
+    status: final
+    regime: dsm-2024
+    notified_date: 2026-04-01
+    effective_from: 2026-04-01
+    effective_to: null
+    amends: dsm-2024
+    tier: core
+    include: false
+    url: https://www.jsalaw.com/wp-content/uploads/2026/04/JSA-Prism-ElectricityPower-April-2026-CERC-Order.Final_.pdf
+    notes: >
+      PUBLIC BUILD: not indexed here (third-party text); its X values are in calculator.py.
+      SECONDARY SOURCE (law-firm bulletin), stand-in for order-9-sm-2025, which could not
+      be obtained (data report DR-10). Gives the X trajectory and the deviation formula.
+      Does not cite the petition number or paragraph numbers. Answers using it must say
+      it is a secondary summary (FR-10). Replace with the official order when available.
+      The site blocks scripted downloads: open the URL in a browser and save the file as
+      data/raw/secondary-jsa-x-order-2026.pdf (build report KI-3).
+
+  # --------------------------------------------------------------------------
+  # TIER: reference — effective-date notices, procedures, Statements of Reasons
+  # --------------------------------------------------------------------------
+  - doc_id: dsm-2024-eff-160924
+    title: Notification — DSM 2024 effective from 16.09.2024 (except Reg 8(8))
+    doc_type: effective_notice
+    status: final
+    regime: dsm-2024
+    notified_date: null
+    effective_from: 2024-09-16
+    effective_to: null
+    amends: dsm-2024
+    tier: reference
+    include: true
+    url: https://cercind.gov.in/Regulations/Noti16.pdf
+    notes: Gazette No. 766. Supersedes the earlier notice 192-effective-160924.pdf.
+
+  - doc_id: dsm-2024-eff-reg8-8-011224
+    title: Notification — Reg 8(8) of DSM 2024 effective from 01.12.2024
+    doc_type: effective_notice
+    status: superseded
+    regime: dsm-2024
+    notified_date: 2024-10-22
+    effective_from: 2024-12-01
+    effective_to: 2024-12-22
+    amends: dsm-2024
+    tier: reference
+    include: true
+    url: https://cercind.gov.in/Regulations/Noti-effec-011224.pdf
+    notes: >
+      Superseded: the 01.12.2024 start was replaced by 23.12.2024. Until Reg 8(8)
+      started, para 27(3)(a) of order dated 06.02.2023 (01/SM/2023) applied. Checked 2026-10-13.
+
+  - doc_id: dsm-2024-eff-reg8-8-231224
+    title: Notification — Reg 8(8) of DSM 2024 effective from 23.12.2024
+    doc_type: effective_notice
+    status: final
+    regime: dsm-2024
+    notified_date: null
+    effective_from: 2024-12-23
+    effective_to: null
+    amends: dsm-2024
+    tier: reference
+    include: true
+    url: https://cercind.gov.in/Regulations/Noti-effec-231224.pdf
+    notes: Same date as the First Amendment taking effect.
+
+  - doc_id: dsm-2024-pool-deficit-procedure
+    title: Detailed Procedure for recovery of charges in case of deficit in the Deviation and Ancillary Service Pool Account
+    doc_type: procedure
+    status: final
+    regime: dsm-2024
+    notified_date: 2024-10-15
+    effective_from: 2024-10-15
+    effective_to: null
+    amends: null
+    tier: reference
+    include: true
+    url: https://cercind.gov.in/Regulations/Approved-Procedure-deficit-DSM-Pool.pdf
+    notes: null
+
+  - doc_id: sor-dsm-2024
+    title: Statement of Reasons — DSM Regulations, 2024
+    doc_type: sor
+    status: final
+    regime: dsm-2024
+    notified_date: null
+    effective_from: null
+    effective_to: null
+    amends: dsm-2024
+    tier: reference
+    include: true
+    url: https://cercind.gov.in/Regulations/SOR192.pdf
+    notes: Explains why each provision was adopted. Used only for "why" questions.
+
+  - doc_id: sor-dsm-2024-amend-1
+    title: Statement of Reasons — DSM (First Amendment) Regulations, 2024
+    doc_type: sor
+    status: final
+    regime: dsm-2024
+    notified_date: null
+    effective_from: null
+    effective_to: null
+    amends: dsm-2024-amend-1
+    tier: reference
+    include: true
+    url: https://cercind.gov.in/regulations/194-SOR.pdf
+    notes: null
+
+  - doc_id: sor-dsm-2024-amend-2
+    title: Statement of Reasons — DSM (Second Amendment) Regulations, 2025
+    doc_type: sor
+    status: final
+    regime: dsm-2024
+    notified_date: 2025-11-14
+    effective_from: null
+    effective_to: null
+    amends: dsm-2024-amend-2
+    tier: reference
+    include: true
+    url: https://cercind.gov.in/regulations/SOR-199.pdf
+    notes: null
+
+  - doc_id: sor-dsm-2024-amend-3
+    title: Statement of Reasons — DSM (Third Amendment) Regulations, 2026
+    doc_type: sor
+    status: final
+    regime: dsm-2024
+    notified_date: null
+    effective_from: null
+    effective_to: null
+    amends: dsm-2024-amend-3
+    tier: reference
+    include: true
+    url: https://cercind.gov.in/regulations/208-third-amendment-for.pdf
+    notes: null
+
+  # --------------------------------------------------------------------------
+  # TIER: history — the previous regime (for old-vs-new comparison, FR-8)
+  # --------------------------------------------------------------------------
+  - doc_id: dsm-2022
+    title: CERC (Deviation Settlement Mechanism and Related Matters) Regulations, 2022
+    doc_type: principal
+    status: superseded
+    regime: dsm-2022
+    notified_date: 2022-03-14
+    effective_from: 2022-12-05
+    effective_to: 2024-09-15
+    amends: null
+    tier: history
+    include: true
+    url: https://cercind.gov.in/Regulations/168_reg.pdf
+    notes: >
+      Gazette No. 147. Replaced by DSM 2024 from 16.09.2024. notified_date is
+      approximate — read the exact date from the PDF in Phase 3.
+
+  - doc_id: dsm-2022-eff-051222
+    title: Notification — DSM 2022 effective from 05.12.2022
+    doc_type: effective_notice
+    status: superseded
+    regime: dsm-2022
+    notified_date: null
+    effective_from: 2022-12-05
+    effective_to: 2024-09-15
+    amends: dsm-2022
+    tier: history
+    include: true
+    url: https://cercind.gov.in/Regulations/Notification-DSM-Regulations-date-of-implementation.pdf
+    notes: null
+
+  - doc_id: sor-dsm-2022
+    title: Statement of Reasons — DSM Regulations, 2022
+    doc_type: sor
+    status: superseded
+    regime: dsm-2022
+    notified_date: null
+    effective_from: null
+    effective_to: null
+    amends: dsm-2022
+    tier: history
+    include: true
+    url: https://cercind.gov.in/Regulations/168-SOR-DSM.pdf
+    notes: null
+
+  # --------------------------------------------------------------------------
+  # TIER: drafts — published drafts and Explanatory Memoranda (FR-5: never law)
+  # All four drafts below were later finalised; they are kept to answer
+  # "what was proposed vs what was adopted" questions.
+  # --------------------------------------------------------------------------
+  - doc_id: draft-dsm-2024
+    title: Draft DSM Regulations, 2024
+    doc_type: draft
+    status: draft
+    regime: dsm-2024
+    notified_date: 2024-04-30
+    effective_from: null
+    effective_to: null
+    amends: null
+    tier: drafts
+    include: true
+    url: https://cercind.gov.in/2024/draft_reg/Noti30424.pdf
+    notes: Final version is dsm-2024. Values in the draft (e.g. tolerance bands) differ from the final text.
+
+  - doc_id: em-draft-dsm-2024
+    title: Explanatory Memorandum — Draft DSM Regulations, 2024
+    doc_type: em
+    status: draft
+    regime: dsm-2024
+    notified_date: 2024-04-30
+    effective_from: null
+    effective_to: null
+    amends: null
+    tier: drafts
+    include: true
+    url: https://cercind.gov.in/2024/draft_reg/EMDSM.pdf
+    notes: null
+
+  - doc_id: draft-dsm-2024-amend-1
+    title: Draft DSM (First Amendment) Regulations, 2024
+    doc_type: draft
+    status: draft
+    regime: dsm-2024
+    notified_date: null
+    effective_from: null
+    effective_to: null
+    amends: dsm-2024
+    tier: drafts
+    include: true
+    url: https://cercind.gov.in/2024/draft_reg/DR-DSM_First Amendment.pdf
+    notes: Comments were due 01.11.2024. Space in URL is intentional (as published).
+
+  - doc_id: em-draft-dsm-2024-amend-1
+    title: Explanatory Memorandum — Draft DSM (First Amendment), 2024
+    doc_type: em
+    status: draft
+    regime: dsm-2024
+    notified_date: null
+    effective_from: null
+    effective_to: null
+    amends: dsm-2024
+    tier: drafts
+    include: true
+    url: https://cercind.gov.in/2024/draft_reg/EM_DSM_First Amendment.pdf
+    notes: null
+
+  - doc_id: draft-dsm-2024-amend-2
+    title: Draft DSM (Second Amendment) Regulations, 2025
+    doc_type: draft
+    status: draft
+    regime: dsm-2024
+    notified_date: 2025-05-10
+    effective_from: null
+    effective_to: null
+    amends: dsm-2024
+    tier: drafts
+    include: true
+    url: https://cercind.gov.in/2025/draft_reg/DN5.pdf
+    notes: null
+
+  - doc_id: em-draft-dsm-2024-amend-2
+    title: Explanatory Memorandum — Draft DSM (Second Amendment), 2025
+    doc_type: em
+    status: draft
+    regime: dsm-2024
+    notified_date: 2025-05-10
+    effective_from: null
+    effective_to: null
+    amends: dsm-2024
+    tier: drafts
+    include: true
+    url: https://cercind.gov.in/2025/draft_reg/EM_DSM 2025-2nd-Amendment.pdf
+    notes: null
+
+  - doc_id: draft-dsm-2024-amend-3
+    title: Draft DSM (Third Amendment) Regulations, 2026
+    doc_type: draft
+    status: draft
+    regime: dsm-2024
+    notified_date: null
+    effective_from: null
+    effective_to: null
+    amends: dsm-2024
+    tier: drafts
+    include: true
+    url: https://cercind.gov.in/2026/draft_reg/DN-DSM-3rd_Amend.pdf
+    notes: Comments were due 26.06.2026.
+
+  - doc_id: em-draft-dsm-2024-amend-3
+    title: Explanatory Memorandum — Draft DSM (Third Amendment), 2026
+    doc_type: em
+    status: draft
+    regime: dsm-2024
+    notified_date: null
+    effective_from: null
+    effective_to: null
+    amends: dsm-2024
+    tier: drafts
+    include: true
+    url: https://cercind.gov.in/2026/draft_reg/EM_DSM_3rdAmendment_Reg_2026.pdf
+    notes: null
+
+  # ==========================================================================
+  # CR-2 BATCH A (added 2026-11-04, registry v1.1) — related CERC regulations
+  # Files were downloaded by tools/download_batch_a.py and saved as <doc_id>.pdf.
+  # Titles are short on purpose: they become the citation name (ingest.short_title).
+  # Dates checked against each PDF's own text on 2026-11-04.
+  # ==========================================================================
+
+  # ---- Grid Code (IEGC) 2023 -----------------------------------------------
+  - doc_id: iegc-2023
+    title: IEGC Regulations, 2023
+    doc_type: principal
+    status: final
+    regime: iegc-2023
+    notified_date: 2023-05-29
+    effective_from: 2023-10-01
+    effective_to: null
+    amends: null
+    tier: core
+    include: true
+    url: https://cercind.gov.in/Regulations/180-Regulations.pdf
+    notes: >
+      Official title: CERC (Indian Electricity Grid Code) Regulations, 2023.
+      Notification L-1/265/2022/CERC dated 29.05.2023; Gazette No. 488, 11.07.2023.
+      In force 01.10.2023 (notice iegc-2023-eff). Replaced the IEGC 2010 (not indexed).
+
+  - doc_id: iegc-2023-amend-1
+    title: IEGC (First Amendment) Regulations, 2024
+    doc_type: amendment
+    status: final
+    regime: iegc-2023
+    notified_date: 2024-10-23
+    effective_from: 2024-10-29
+    effective_to: null
+    amends: iegc-2023
+    tier: core
+    include: true
+    url: https://cercind.gov.in/regulations/193.pdf
+    notes: >
+      Gazette No. 880, 29.10.2024. In force on publication, except the change to
+      Reg. 45(12), which applies from 01.04.2024 (backdated). Infirm power limits,
+      trial run, scheduling after COD, part-load compensation, DC revisions.
+
+  - doc_id: iegc-2023-eff
+    title: Notification — IEGC 2023 in force from 01.10.2023
+    doc_type: effective_notice
+    status: final
+    regime: iegc-2023
+    notified_date: 2023-08-03
+    effective_from: 2023-10-01
+    effective_to: null
+    amends: iegc-2023
+    tier: reference
+    include: true
+    url: https://cercind.gov.in/Regulations/180-effective-030823.pdf
+    notes: null
+
+  - doc_id: sor-iegc-2023
+    title: Statement of Reasons — IEGC Regulations, 2023
+    doc_type: sor
+    status: final
+    regime: iegc-2023
+    notified_date: null
+    effective_from: null
+    effective_to: null
+    amends: iegc-2023
+    tier: reference
+    include: true
+    url: https://cercind.gov.in/regulations/180-SOR.pdf
+    notes: Used only for "why" questions.
+
+  # ---- Ancillary Services 2022 ---------------------------------------------
+  - doc_id: as-2022
+    title: Ancillary Services Regulations, 2022
+    doc_type: principal
+    status: final
+    regime: as-2022
+    notified_date: 2022-01-31
+    effective_from: 2022-12-05
+    effective_to: null
+    amends: null
+    tier: core
+    include: true
+    url: https://cercind.gov.in/Regulations/Ancillary-Service-Regulations-2022.pdf
+    notes: >
+      Official title: CERC (Ancillary Services) Regulations, 2022. Gazette No. 85, 12.02.2022.
+      In force 05.12.2022, EXCEPT the TRAS parts of Reg. 6, Regs. 14–19, TRAS parts of
+      Regs. 20–22 and Reg. 26, which started 01.06.2023 (after two postponements; see
+      as-2022-eff-* notices).
+
+  - doc_id: as-2022-eff-051222
+    title: Notification — Ancillary Services Regulations in force from 05.12.2022 (except TRAS provisions)
+    doc_type: effective_notice
+    status: final
+    regime: as-2022
+    notified_date: null
+    effective_from: 2022-12-05
+    effective_to: null
+    amends: as-2022
+    tier: reference
+    include: true
+    url: https://cercind.gov.in/Regulations/Notification-Ancillary-Regulations-date-of-implementation.pdf
+    notes: Gazette No. 546, 09.11.2022. 2015 Detailed Procedures continue until further directions.
+
+  - doc_id: as-2022-eff-tras-010423
+    title: Notification — TRAS provisions to start 01.04.2023 (later postponed)
+    doc_type: effective_notice
+    status: superseded
+    regime: as-2022
+    notified_date: 2023-02-15
+    effective_from: 2023-02-15
+    effective_to: 2023-03-26
+    amends: as-2022
+    tier: reference
+    include: true
+    url: https://cercind.gov.in/Regulations/Notification-Ancillary-Regulations-150223.pdf
+    notes: >
+      NEVER TOOK EFFECT: superseded on 27.03.2023 (start moved to 01.05.2023).
+      Dates here are the window in which this notice was the latest word, so a
+      question dated in that window sees it; later dates do not.
+
+  - doc_id: as-2022-eff-tras-010523
+    title: Notification — TRAS provisions to start 01.05.2023 (later postponed)
+    doc_type: effective_notice
+    status: superseded
+    regime: as-2022
+    notified_date: 2023-03-27
+    effective_from: 2023-03-27
+    effective_to: 2023-04-27
+    amends: as-2022
+    tier: reference
+    include: true
+    url: https://cercind.gov.in/Regulations/167_8.pdf
+    notes: >
+      NEVER TOOK EFFECT: superseded on 28.04.2023 (start moved to 01.06.2023).
+      Same date convention as as-2022-eff-tras-010423.
+
+  - doc_id: as-2022-eff-tras-010623
+    title: Notification — TRAS provisions in force from 01.06.2023
+    doc_type: effective_notice
+    status: final
+    regime: as-2022
+    notified_date: 2023-04-28
+    effective_from: 2023-04-28
+    effective_to: null
+    amends: as-2022
+    tier: reference
+    include: true
+    url: https://cercind.gov.in/Regulations/167_10.pdf
+    notes: >
+      Final start date of TRAS (Reg. 6 TRAS parts, Regs. 14–19, 20–22 TRAS parts, Reg. 26)
+      is 01.06.2023; 2015 Detailed Procedures ceased the same day. effective_from is the
+      notice date (convention above), not 01.06.2023.
+
+  - doc_id: sor-as-2022
+    title: Statement of Reasons — Ancillary Services Regulations, 2022
+    doc_type: sor
+    status: final
+    regime: as-2022
+    notified_date: null
+    effective_from: null
+    effective_to: null
+    amends: as-2022
+    tier: reference
+    include: true
+    url: https://cercind.gov.in/Regulations/SOR-167.pdf
+    notes: Used only for "why" questions.
+
+  # ---- Connectivity and GNA 2022 -------------------------------------------
+  - doc_id: gna-2022
+    title: GNA Regulations, 2022
+    doc_type: principal
+    status: final
+    regime: gna-2022
+    notified_date: 2022-06-07
+    effective_from: 2022-10-15
+    effective_to: null
+    amends: null
+    tier: core
+    include: true
+    url: https://cercind.gov.in/regulations/175-Notification.pdf
+    notes: >
+      Official title: CERC (Connectivity and General Network Access to the inter-State
+      Transmission System) Regulations, 2022. Gazette No. 364, 19.07.2022. Parts in force
+      15.10.2022; the remaining regulations (incl. First Amendment) from 01.10.2023.
+
+  - doc_id: gna-2022-corr
+    title: Corrigendum to GNA Regulations, 2022 (18.06.2022)
+    doc_type: amendment
+    status: final
+    regime: gna-2022
+    notified_date: 2022-06-18
+    effective_from: 2022-10-15
+    effective_to: null
+    amends: gna-2022
+    tier: core
+    include: true
+    url: https://cercind.gov.in/regulations/Corrigendum_GNA_Regulations.pdf
+    notes: Adds a sentence to Annexure-I (GNA for HVDC_SR). Applies with the principal text.
+
+  - doc_id: gna-2022-amend-1
+    title: GNA (First Amendment) Regulations, 2023
+    doc_type: amendment
+    status: final
+    regime: gna-2022
+    notified_date: 2023-04-01
+    effective_from: 2023-04-05
+    effective_to: null
+    amends: gna-2022
+    tier: core
+    include: true
+    url: https://www.cercind.gov.in/Regulations/178-Noti.pdf
+    notes: Gazette No. 229, 06.04.2023. In force 05.04.2023 (notice gna-2022-amend-1-eff).
+
+  - doc_id: gna-2022-amend-2
+    title: GNA (Second Amendment) Regulations, 2024
+    doc_type: amendment
+    status: final
+    regime: gna-2022
+    notified_date: 2024-06-19
+    effective_from: 2024-07-15
+    effective_to: null
+    amends: gna-2022
+    tier: core
+    include: true
+    url: https://cercind.gov.in/regulations/190-Noti.pdf
+    notes: >
+      Gazette No. 469, 01.07.2024. In force 15.07.2024 (notice gna-2022-amend-2-eff).
+      English notification indexed instead of the Gazette copy (190-Gazt.pdf) listed
+      in CR-2, per the text-source rule.
+
+  - doc_id: gna-2022-amend-3
+    title: GNA (Third Amendment) Regulations, 2025
+    doc_type: amendment
+    status: final
+    regime: gna-2022
+    notified_date: 2025-08-31
+    effective_from: 2025-09-09
+    effective_to: null
+    amends: gna-2022
+    tier: core
+    include: true
+    url: https://cercind.gov.in/regulations/201.pdf
+    notes: >
+      Gazette No. 622, 09.09.2025; in force on publication. English notification indexed
+      instead of the Gazette copy (201-GAZ.pdf) listed in CR-2.
+
+  - doc_id: gna-2022-amend-3-corr
+    title: Corrigendum to GNA (Third Amendment) Regulations, 2025 (04.11.2025)
+    doc_type: amendment
+    status: final
+    regime: gna-2022
+    notified_date: 2025-11-04
+    effective_from: 2025-09-09
+    effective_to: null
+    amends: gna-2022
+    tier: core
+    include: true
+    url: https://cercind.gov.in/regulations/Corri-201-consolidated.pdf
+    notes: Corrects the Third Amendment text; applies from the amendment's own start date.
+
+  - doc_id: gna-2022-eff-151022
+    title: Notification — GNA Regulations in force from 15.10.2022 (in part)
+    doc_type: effective_notice
+    status: final
+    regime: gna-2022
+    notified_date: 2022-10-09
+    effective_from: 2022-10-15
+    effective_to: null
+    amends: gna-2022
+    tier: reference
+    include: true
+    url: https://cercind.gov.in/regulations/Effective_Date_of_GNA_Regulations2022.pdf
+    notes: null
+
+  - doc_id: gna-2022-amend-1-eff
+    title: Notification — GNA First Amendment in force from 05.04.2023
+    doc_type: effective_notice
+    status: final
+    regime: gna-2022
+    notified_date: 2023-04-01
+    effective_from: 2023-04-05
+    effective_to: null
+    amends: gna-2022
+    tier: reference
+    include: true
+    url: https://cercind.gov.in/regulations/178-effective.pdf
+    notes: Added beyond the CR-2 list (effective-date notice for an approved document).
+
+  - doc_id: gna-2022-eff-011023
+    title: Notification — remaining GNA Regulations (incl. First Amendment) in force from 01.10.2023
+    doc_type: effective_notice
+    status: final
+    regime: gna-2022
+    notified_date: 2023-08-03
+    effective_from: 2023-10-01
+    effective_to: null
+    amends: gna-2022
+    tier: reference
+    include: true
+    url: https://cercind.gov.in/Regulations/effective-030823.pdf
+    notes: Also sets the start of scheduling and despatch under GNA.
+
+  - doc_id: gna-2022-amend-2-eff
+    title: Notification — GNA Second Amendment in force from 15.07.2024
+    doc_type: effective_notice
+    status: final
+    regime: gna-2022
+    notified_date: 2024-07-04
+    effective_from: 2024-07-15
+    effective_to: null
+    amends: gna-2022
+    tier: reference
+    include: true
+    url: https://cercind.gov.in/regulations/190-effective-010624.pdf
+    notes: Added beyond the CR-2 list (effective-date notice for an approved document).
+
+  - doc_id: sor-gna-2022-amend-1
+    title: Statement of Reasons — GNA (First Amendment) Regulations, 2023
+    doc_type: sor
+    status: final
+    regime: gna-2022
+    notified_date: 2024-07-31
+    effective_from: null
+    effective_to: null
+    amends: gna-2022-amend-1
+    tier: reference
+    include: true
+    url: https://cercind.gov.in/regulations/178-SOR.pdf
+    notes: Added beyond the CR-2 list. Used only for "why" questions.
+
+  - doc_id: proc-gna-metering-scheduling
+    title: Detailed Procedure for metering, accounting and scheduling under the GNA Regulations (order dated 04.05.2026)
+    doc_type: procedure
+    status: final
+    regime: gna-2022
+    notified_date: 2026-05-04
+    effective_from: 2026-05-04
+    effective_to: null
+    amends: null
+    tier: reference
+    include: true
+    url: https://cercind.gov.in/regulations/DP-L_1_261_2021_04052026.pdf
+    notes: CR-2 item P5.
+
+  - doc_id: proc-solar-hours
+    title: Detailed Procedure for declaration of state-wise solar and non-solar hours (order dated 25.05.2026)
+    doc_type: procedure
+    status: final
+    regime: gna-2022
+    notified_date: 2026-05-25
+    effective_from: 2026-05-25
+    effective_to: null
+    amends: null
+    tier: reference
+    include: true
+    url: https://cercind.gov.in/regulations/201N.pdf
+    notes: CR-2 item P6. Date read from the order (CR-2 had "not stated").
+
+  # ---- Power Market 2021 ---------------------------------------------------
+  - doc_id: pmr-2021
+    title: Power Market Regulations, 2021
+    doc_type: principal
+    status: final
+    regime: pmr-2021
+    notified_date: 2021-02-15
+    effective_from: 2021-08-15
+    effective_to: null
+    amends: null
+    tier: core
+    include: true
+    url: https://cercind.gov.in/2021/regulation/161-reg.pdf
+    notes: >
+      Official title: CERC (Power Market) Regulations, 2021. Gazette No. 241, 16.06.2021.
+      In force 15.08.2021. Replaced the Power Market Regulations, 2010 (not indexed).
+      Amendments to PMR 2021, if any, were not found on CERC's Current Regulations page.
+
+  - doc_id: pmr-2021-eff
+    title: Notification — Power Market Regulations, 2021 in force from 15.08.2021
+    doc_type: effective_notice
+    status: final
+    regime: pmr-2021
+    notified_date: null
+    effective_from: 2021-08-15
+    effective_to: null
+    amends: pmr-2021
+    tier: reference
+    include: true
+    url: https://cercind.gov.in/2021/regulation/Notification-notifiying-Power-Market-Regulations.pdf
+    notes: Added beyond the CR-2 list (effective-date notice for an approved document).
+
+  - doc_id: sor-pmr-2021
+    title: Statement of Reasons — Power Market Regulations, 2021
+    doc_type: sor
+    status: final
+    regime: pmr-2021
+    notified_date: 2021-03-23
+    effective_from: null
+    effective_to: null
+    amends: pmr-2021
+    tier: reference
+    include: true
+    url: https://cercind.gov.in/2021/regulation/161_SOR.pdf
+    notes: Used only for "why" questions.
+
+  # ---- Batch A items not yet obtained (include: false until the file is saved) ----
+  - doc_id: order-1-sm-2025
+    title: Order 01/SM/2025 — recovery of legacy dues in the DSM Pool Account
+    doc_type: order
+    status: final
+    regime: dsm-2024
+    notified_date: 2025-01-08
+    effective_from: 2025-01-08
+    effective_to: null
+    amends: dsm-2024
+    tier: reference
+    include: false
+    url: https://www.cercind.gov.in/2025/orders/01-SM-2025.pdf
+    notes: CR-2 item P2. Not on the Current Regulations page, so the script did not fetch it. Save manually as data/raw/order-1-sm-2025.pdf.
+
+  - doc_id: proc-sras-tras
+    title: Detailed Procedure for SRAS and TRAS (ancillary services)
+    doc_type: procedure
+    status: final
+    regime: as-2022
+    notified_date: 2023-09-28
+    effective_from: 2023-09-28
+    effective_to: null
+    amends: null
+    tier: reference
+    include: false
+    url: https://cercind.gov.in/Regulations/Order_SRAS TRAS.pdf
+    notes: CR-2 item P3. Download failed in script cr2a.1 (space in URL); retry with cr2a.2.
+
+  - doc_id: proc-scuc-sced
+    title: Detailed Procedure for SCUC, USD and SCED
+    doc_type: procedure
+    status: final
+    regime: iegc-2023
+    notified_date: 2024-04-16
+    effective_from: 2024-04-16
+    effective_to: null
+    amends: null
+    tier: reference
+    include: false
+    url: https://cercind.gov.in/2024/orders/Detailed Procedure for SCUCAG.pdf
+    notes: CR-2 item P4. Download failed in script cr2a.1 (space in URL); retry with cr2a.2.
+
+# -----------------------------------------------------------------------------
+# Deliberately excluded (decision recorded in docs/03-data-report.md):
+#   - DSM 2014 Regulations and their five amendments (two regimes old)
+#   - Stakeholder comments and hearing presentations (opinions, not rules)
+#   - Gazette copies of documents already listed above (duplicate text)
+#   - IEGC 2010, Connectivity 2009, Open Access 2008, Power Market 2010, Ancillary
+#     Services Operations 2015 and their amendments (replaced; CR-2 Batch A scan)
+#   - Removal-of-difficulty orders and other GNA/IEGC orders found by the scan:
+#     proposed as CR-2 Batch A+ for the owner to decide (see CR-2 §3)
+# -----------------------------------------------------------------------------
