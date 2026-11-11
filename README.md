@@ -2,7 +2,7 @@
 
 Grounded answers on India's CERC **Deviation Settlement Mechanism (DSM)** regulations, for the version in force on the date you ask about, with the clause and page for every fact.
 
-**Live demo:** [_add your Streamlit link here_](https://dsm-regulation-assistant-hvbzqvy8s7hw3acaxbhmlr.streamlit.app/) · **Stack:** Python, ChromaDB, BM25, sentence-transformers, Gemini, Streamlit
+**Live demo:** https://dsm-regulation-assistant-hvbzqvy8s7hw3acaxbhmlr.streamlit.app/ · **Stack:** Python, ChromaDB, BM25, sentence-transformers, Gemini, Streamlit
 
 <!-- Screenshots: add docs/screenshots/ask.png, topic.png, calculator.png and uncomment
 ![Ask](docs/screenshots/ask.png)
